@@ -7,8 +7,8 @@ function getWeek() {
     return week;
 }
 
+const NB_WEEK = 10;
 function getCalendar() {
-    const NB_WEEK = 10;
     let calendar = [];
     for (let i = 0; i < NB_WEEK; i++) {
         calendar = calendar.concat(getWeek());
@@ -16,8 +16,8 @@ function getCalendar() {
     return calendar;
 }
 
+const NB_PEOPLE = 10;
 function getRandomCalendar() {
-    const NB_PEOPLE = 10;
     const calendar = getCalendar();
 
     calendar.forEach(day => {
@@ -37,7 +37,8 @@ function getRandomCalendar() {
 
 function evaluate(calendar) {
     calendar.score = 0;
-    mustWorkOncePerDay(calendar);
+    //mustWorkOncePerDay(calendar);
+    mustWorkNotToMuch(calendar);
 }
 
 function mustWorkOncePerDay(calendar) {
@@ -56,6 +57,31 @@ function mustWorkOncePerDay(calendar) {
             calendar.score++;
         }
     })
+}
+
+function mustWorkNotToMuch(calendar) {
+    // Temps annuel temps plein: 1547h soit 148h/ 4 semaines et 118h/4 semaines pour 80%
+
+    for (let index = 0; index < NB_WEEK; index++) {
+        let startIndex = index * 7;
+        let endIndex = startIndex + 7 * 4;
+        const period = calendar.slice(startIndex, endIndex);
+
+        for (let personId = 0; personId < NB_PEOPLE; personId++) {
+            let nbHours = 0;
+            period.forEach(day => {
+                for (let slot in day) {
+                    if (day[slot] == personId) {
+                        nbHours += 8;
+                    }
+                }
+            })
+
+            if (nbHours <= 148) {
+                calendar.score++;
+            }
+        }
+    }
 }
 
 function copy(calendar) {
@@ -147,7 +173,7 @@ function getPopulation(old = []) {
 }
 
 function run() {
-    const maxRun = 500;
+    const maxRun = 100;
     let nbRun = 0;
 
     let population = [];
