@@ -26,7 +26,6 @@ function getRandomCalendar() {
 function evaluate(calendar) {
     calendar.score = 0;
     mustWorkOncePerDay(calendar);
-    console.log(calendar)
 }
 
 function mustWorkOncePerDay(calendar) {
@@ -47,5 +46,23 @@ function mustWorkOncePerDay(calendar) {
     })
 }
 
+function run() {
+    const maxRun = 500000;
+    let nbRun = 0;
 
-evaluate(getRandomCalendar())
+    let best = null;
+
+    while (nbRun < maxRun) {
+        nbRun++;
+        let calendar = getRandomCalendar();
+        evaluate(calendar);
+        if (best == null || best.score < calendar.score) {
+            best = calendar;
+        }
+        console.log(nbRun + '/' + maxRun)
+    }
+
+    console.log(best);
+}
+
+run()
