@@ -8,15 +8,21 @@ function getWeek() {
 }
 
 function getCalendar() {
-    return getWeek().concat(getWeek(), getWeek(), getWeek());
+    const NB_WEEK = 10;
+    let calendar = [];
+    for (let i = 0; i < NB_WEEK; i++) {
+        calendar = calendar.concat(getWeek());
+    }
+    return calendar;
 }
 
 function getRandomCalendar() {
+    const NB_PEOPLE = 10;
     const calendar = getCalendar();
 
     calendar.forEach(day => {
         for (let slot in day) {
-            day[slot] = Math.floor(Math.random() * 10);
+            day[slot] = Math.floor(Math.random() * NB_PEOPLE);
         }
     })
 
@@ -99,7 +105,7 @@ function getSubPopulation(population, nb) {
     return pop;
 }
 
-const MAX_POP = 1000;
+const MAX_POP = 500;
 
 function getPopulation(old = []) {
     let population = [];
@@ -108,16 +114,16 @@ function getPopulation(old = []) {
     old.sort((a, b) => b.score - a.score);
 
     // keep bests score
-    population = old.slice(0, Math.floor(old.length / 4));
+    population = old.slice(0, 10);
 
     // mutate some
     if (population.length) {
-        population = population.concat(old.slice(0, Math.floor(old.length / 4)).map(calendar => mutate(copy(calendar))));
+        population = population.concat(old.slice(0, Math.floor(old.length / 3)).map(calendar => mutate(copy(calendar))));
     }
 
     // breed other
     if (population.length) {
-        const parents = old.slice(0, Math.floor(old.length / 4));
+        const parents = old.slice(0, Math.floor(old.length / 3));
         let previous = parents[0];
         for (let i = 1; i < parents.length; i += 2) {
             const element = parents[i];
