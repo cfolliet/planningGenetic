@@ -70,6 +70,25 @@ function mutate(calendar) {
     return calendar;
 }
 
+function breed(a, b) {
+    let c = getCalendar();
+    let d = getCalendar();
+
+    a.forEach((day, index) => {
+        for (let slot in day) {
+            if (index % 2) {
+                c[index][slot] = day[slot];
+                d[index][slot] = b[index][slot];
+            } else {
+                c[index][slot] = b[index][slot];
+                d[index][slot] = day[slot];
+            }
+        }
+    });
+
+    return [c, d]
+}
+
 function getSubPopulation(population, nb) {
     const pop = [];
 
@@ -80,7 +99,7 @@ function getSubPopulation(population, nb) {
     return pop;
 }
 
-const MAX_POP = 500;
+const MAX_POP = 1000;
 
 function getPopulation(old = []) {
     let population = [];
@@ -89,15 +108,26 @@ function getPopulation(old = []) {
     old.sort((a, b) => b.score - a.score);
 
     // keep bests score
-    population = old.slice(0, Math.floor(old.length / 3));
+    population = old.slice(0, Math.floor(old.length / 4));
 
     // mutate some
     if (population.length) {
-        population = population.concat(old.slice(0, Math.floor(population.length / 3)).map(calendar => mutate(copy(calendar))));
+        population = population.concat(old.slice(0, Math.floor(old.length / 4)).map(calendar => mutate(copy(calendar))));
+    }
+
+    // breed other
+    if (population.length) {
+        const parents = old.slice(0, Math.floor(old.length / 4));
+        let previous = parents[0];
+        for (let i = 1; i < parents.length; i += 2) {
+            const element = parents[i];
+            population = population.concat(breed(previous, element));
+            previous = element;
+        }
     }
 
     //complete with random
-    for (let index = population.length - 1; index < MAX_POP; index++) {
+    for (let index = population.length; index < MAX_POP; index++) {
         population.push(getRandomCalendar());
     }
 
@@ -114,7 +144,7 @@ function run() {
         nbRun++;
         population = getPopulation(population);
         population.forEach(calendar => evaluate(calendar));
-        console.log(nbRun + '/' + maxRun)
+        console.log(nbRun + '/' + maxRun + ' best: ' + population.sort((a, b) => b.score - a.score)[0].score)
     }
 
     const bestCalendar = population.sort((a, b) => b.score - a.score)[0];
