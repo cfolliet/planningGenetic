@@ -46,23 +46,37 @@ function mustWorkOncePerDay(calendar) {
     })
 }
 
+const MAX_POP = 500;
+
+function getPopulation(old = []) {
+    let pop = [];
+
+    // keep best score
+    pop = old.sort((a, b) => b.score - a.score).slice(0, 10);
+
+    //complete with random
+    for (let index = pop.length - 1; index < MAX_POP; index++) {
+        pop.push(getRandomCalendar());
+    }
+
+    return pop;
+}
+
 function run() {
-    const maxRun = 500000;
+    const maxRun = 1000;
     let nbRun = 0;
 
-    let best = null;
+    let population = getPopulation([]);
 
     while (nbRun < maxRun) {
         nbRun++;
-        let calendar = getRandomCalendar();
-        evaluate(calendar);
-        if (best == null || best.score < calendar.score) {
-            best = calendar;
-        }
+        population.forEach(calendar => evaluate(calendar));
+        population = getPopulation(population);
         console.log(nbRun + '/' + maxRun)
     }
 
-    console.log(best);
+    const bestCalendar = population.sort((a, b) => b.score - a.score)[0];
+    console.log(bestCalendar);
 }
 
 run()
