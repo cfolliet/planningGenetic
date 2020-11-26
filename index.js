@@ -21,8 +21,14 @@ function getRandomCalendar() {
     const calendar = getCalendar();
 
     calendar.forEach(day => {
+        const peoples = [];
+        for (let i = 0; i < NB_PEOPLE; i++) {
+            peoples.push(i);
+        }
+        peoples.sort(() => 0.5 - Math.random());
+
         for (let slot in day) {
-            day[slot] = Math.floor(Math.random() * NB_PEOPLE);
+            day[slot] = peoples.pop();
         }
     })
 
