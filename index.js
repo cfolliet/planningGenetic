@@ -61,7 +61,6 @@ function mustWorkOncePerDay(calendar) {
 
 function mustWorkNotToMuch(calendar) {
     // Temps annuel temps plein: 1547h soit 148h/ 4 semaines et 118h/4 semaines pour 80%
-    //TODO prendre en compte les 2 temps partiel
 
     for (let index = 0; index < NB_WEEK; index++) {
         let startIndex = index * 7;
@@ -78,7 +77,7 @@ function mustWorkNotToMuch(calendar) {
                 }
             })
 
-            if (nbHours <= 148) {
+            if (nbHours <= 118 || (index < NB_PEOPLE - NB_PARTIAL && nbHours <= 148)) {
                 calendar.score++;
             }
         }
