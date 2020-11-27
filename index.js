@@ -20,16 +20,25 @@ const NB_PEOPLE = 10;
 const NB_PARTIAL = 2;
 function getRandomCalendar() {
     const calendar = getCalendar();
+    const peopleWorkingDays = new Array(NB_PEOPLE).fill(0);
 
-    calendar.forEach(day => {
+    calendar.forEach((day, dayIndex) => {
+        if ((dayIndex + 1) % 7 == 0) {
+            peopleWorkingDays.fill(0);
+        }
+
         const peoples = [];
         for (let i = 0; i < NB_PEOPLE; i++) {
-            peoples.push(i);
+            if (peopleWorkingDays[i] < 6) {
+                peoples.push(i);
+            }
         }
         peoples.sort(() => 0.5 - Math.random());
 
         for (let slot in day) {
-            day[slot] = peoples.pop();
+            const pId = peoples.pop();
+            peopleWorkingDays[pId] = peopleWorkingDays[pId] + 1;
+            day[slot] = pId;
         }
     })
 
@@ -124,7 +133,7 @@ function mustHaveRest(calendar) {
             if (nbRest >= 4 && nbSatSunRest >= 1) {
                 calendar.score++;
             } else {
-                calendar.issues.push(`pId ${personId} has only ${nbRest} rest, with ${nbSatSunRest} weekend from day ${startIndex} to ${endIndex} (week ${index + 1})`);
+                calendar.issues.push(`pId ${personId} has ${nbRest} rest, with ${nbSatSunRest} weekend from day ${startIndex} to ${endIndex} (week ${index + 1}-${index + 2})`);
             }
         }
     }
