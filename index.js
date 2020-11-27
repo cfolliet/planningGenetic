@@ -85,7 +85,7 @@ function mustWorkNotToMuch(calendar) {
             if (nbHours <= 118 || (index < NB_PEOPLE - NB_PARTIAL && nbHours <= 148)) {
                 calendar.score++;
             } else {
-                calendar.issues.push(`pId ${personId} work to much (${nbHours}h) from day ${startIndex} to ${endIndex}`);
+                calendar.issues.push(`pId ${personId} work to much (${nbHours}h) from day ${startIndex} to ${endIndex} (week ${index + 1})`);
             }
         }
     }
@@ -124,7 +124,7 @@ function mustHaveRest(calendar) {
             if (nbRest >= 4 && nbSatSunRest >= 1) {
                 calendar.score++;
             } else {
-                calendar.issues.push(`pId ${personId} has only ${nbRest} rest, with ${nbSatSunRest} weekend`);
+                calendar.issues.push(`pId ${personId} has only ${nbRest} rest, with ${nbSatSunRest} weekend from day ${startIndex} to ${endIndex} (week ${index + 1})`);
             }
         }
     }
