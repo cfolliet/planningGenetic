@@ -45,7 +45,7 @@ function evaluate(calendar) {
 }
 
 function mustWorkOncePerDay(calendar) {
-    calendar.forEach(day => {
+    calendar.forEach((day, dayIndex) => {
         let hasDuplicate = false;
 
         for (let slot in day) {
@@ -59,7 +59,7 @@ function mustWorkOncePerDay(calendar) {
         if (!hasDuplicate) {
             calendar.score++;
         } else {
-            calendar.issues.push(`pId ${personId} work twice the same day`);
+            calendar.issues.push(`Someone work twice the same day, day ${dayIndex}`);
         }
     })
 }
@@ -85,7 +85,7 @@ function mustWorkNotToMuch(calendar) {
             if (nbHours <= 118 || (index < NB_PEOPLE - NB_PARTIAL && nbHours <= 148)) {
                 calendar.score++;
             } else {
-                calendar.issues.push(`pId ${personId} work to much from day ${startIndex} to ${endIndex}`);
+                calendar.issues.push(`pId ${personId} work to much (${nbHours}h) from day ${startIndex} to ${endIndex}`);
             }
         }
     }
@@ -124,7 +124,7 @@ function mustHaveRest(calendar) {
             if (nbRest >= 4 && nbSatSunRest >= 1) {
                 calendar.score++;
             } else {
-                calendar.issues.push(`pId ${personId} has only ${nbRest} rest, with ${nbSatSunRest} sunday`);
+                calendar.issues.push(`pId ${personId} has only ${nbRest} rest, with ${nbSatSunRest} weekend`);
             }
         }
     }
@@ -183,7 +183,7 @@ function getSubPopulation(population, nb) {
     return pop;
 }
 
-const MAX_POP = 1000;
+const MAX_POP = 500;
 
 function getPopulation(old = []) {
     let population = [];
@@ -192,16 +192,16 @@ function getPopulation(old = []) {
     old.sort((a, b) => b.score - a.score);
 
     // keep bests score
-    population = old.slice(0, 10);
+    population = old.slice(0, Math.floor(old.length * 0.1));
 
     // mutate some
     if (population.length) {
-        population = population.concat(old.slice(0, Math.floor(old.length / 3)).map(calendar => mutate(copy(calendar))));
+        population = population.concat(old.slice(0, Math.floor(old.length * 0.33)).map(calendar => mutate(copy(calendar))));
     }
 
     // breed other
     if (population.length) {
-        const parents = old.slice(0, Math.floor(old.length / 3));
+        const parents = old.slice(0, Math.floor(old.length * 0.33));
         let previous = parents[0];
         for (let i = 1; i < parents.length; i += 2) {
             const element = parents[i];
@@ -219,7 +219,7 @@ function getPopulation(old = []) {
 }
 
 function run() {
-    const maxRun = 1000;
+    const maxRun = 300;
     let nbRun = 0;
 
     let population = [];
