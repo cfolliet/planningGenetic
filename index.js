@@ -17,6 +17,7 @@ function getCalendar() {
 }
 
 const NB_PEOPLE = 10;
+const NB_PARTIAL = 2;
 function getRandomCalendar() {
     const calendar = getCalendar();
 
@@ -37,8 +38,9 @@ function getRandomCalendar() {
 
 function evaluate(calendar) {
     calendar.score = 0;
-    //mustWorkOncePerDay(calendar);
-    mustWorkNotToMuch(calendar);
+    mustWorkOncePerDay(calendar); // score max 70
+    mustWorkNotToMuch(calendar); // score max 100;
+    mustHaveRest(calendar); //score max 50
 }
 
 function mustWorkOncePerDay(calendar) {
@@ -78,6 +80,43 @@ function mustWorkNotToMuch(calendar) {
             })
 
             if (nbHours <= 118 || (index < NB_PEOPLE - NB_PARTIAL && nbHours <= 148)) {
+                calendar.score++;
+            }
+        }
+    }
+}
+
+function mustHaveRest(calendar) {
+    // 4 RH à la quatorzaine dont 2 consécutifs dont un dimanche (de préférence samedi et dimanche mais dimanche lundi autorisé)
+    for (let index = 0; index < NB_WEEK; index += 2) {
+        let startIndex = index * 7;
+        let endIndex = startIndex + 7 * 2;
+        const period = calendar.slice(startIndex, endIndex);
+
+        for (let personId = 0; personId < NB_PEOPLE; personId++) {
+            let nbRest = 0;
+            let lastRestDayIndex = null;
+            let nbSatSunRest = 0;
+            period.forEach((day, dayIndex) => {
+                let isWorking = false;
+                for (let slot in day) {
+                    if (day[slot] == personId) {
+                        isWorking = true;
+                    }
+                }
+
+                if (!isWorking) {
+                    nbRest++;
+                    const isCoupled = lastRestDayIndex && (lastRestDayIndex + 1 == dayIndex);
+                    const isSunday = (dayIndex + 1) % 7 == 0;
+                    const isMonday = (dayIndex + 1) % 1 == 0;
+                    if (isCoupled && (isSunday || isMonday)) {
+                        nbSatSunRest++;
+                    }
+                    lastRestDayIndex = dayIndex;
+                }
+            });
+            if (nbRest >= 4 && nbSatSunRest >= 1) {
                 calendar.score++;
             }
         }
@@ -137,7 +176,7 @@ function getSubPopulation(population, nb) {
     return pop;
 }
 
-const MAX_POP = 500;
+const MAX_POP = 1000;
 
 function getPopulation(old = []) {
     let population = [];
@@ -173,7 +212,7 @@ function getPopulation(old = []) {
 }
 
 function run() {
-    const maxRun = 100;
+    const maxRun = 1000;
     let nbRun = 0;
 
     let population = [];
