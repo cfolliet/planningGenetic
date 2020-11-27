@@ -38,6 +38,7 @@ function getRandomCalendar() {
 
 function evaluate(calendar) {
     calendar.score = 0;
+    calendar.issues = [];
     mustWorkOncePerDay(calendar); // score max 70
     mustWorkNotToMuch(calendar); // score max 100;
     mustHaveRest(calendar); //score max 50
@@ -57,6 +58,8 @@ function mustWorkOncePerDay(calendar) {
 
         if (!hasDuplicate) {
             calendar.score++;
+        } else {
+            calendar.issues.push(`pId ${personId} work twice the same day`);
         }
     })
 }
@@ -81,6 +84,8 @@ function mustWorkNotToMuch(calendar) {
 
             if (nbHours <= 118 || (index < NB_PEOPLE - NB_PARTIAL && nbHours <= 148)) {
                 calendar.score++;
+            } else {
+                calendar.issues.push(`pId ${personId} work to much from day ${startIndex} to ${endIndex}`);
             }
         }
     }
@@ -118,6 +123,8 @@ function mustHaveRest(calendar) {
             });
             if (nbRest >= 4 && nbSatSunRest >= 1) {
                 calendar.score++;
+            } else {
+                calendar.issues.push(`pId ${personId} has only ${nbRest} rest, with ${nbSatSunRest} sunday`);
             }
         }
     }
