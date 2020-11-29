@@ -37,9 +37,16 @@ function getRandomCalendar() {
         peoples.sort(() => 0.5 - Math.random());
 
         for (let slot in day) {
-            //const isNight = slot == 'n1' || slot == 'n2';
-            //const isDayer = id => id < NB_PEOPLE - NB_PARTIAL - NB_NIGHT || id >= NB_PEOPLE - NB_PARTIAL;
-            const pId = peoples.pop();
+            const isNight = slot == 'n1' || slot == 'n2';
+            let pId = null;
+            if (isNight) {
+                pId = peoples.pop();
+            } else {
+                const isDayWorker = id => id < NB_PEOPLE - NB_PARTIAL - NB_NIGHT || id >= NB_PEOPLE - NB_PARTIAL;
+                const index = peoples.findIndex(p => isDayWorker(p));
+                pId = peoples.splice(index, 1)[0];
+            }
+
             peopleWorkingDays[pId] = peopleWorkingDays[pId] + 1;
             day[slot] = pId;
         }
@@ -211,7 +218,7 @@ function breed(a, b) {
 }
 
 
-const MAX_POP = 100;
+const MAX_POP = 200;
 
 function getPopulation(old = []) {
     let population = [];
@@ -247,7 +254,7 @@ function getPopulation(old = []) {
 }
 
 function run() {
-    const maxRun = 100;
+    const maxRun = 200;
     let nbRun = 0;
 
     let population = [];
