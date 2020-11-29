@@ -16,7 +16,8 @@ function getCalendar() {
     return calendar;
 }
 
-const NB_PEOPLE = 10;
+const NB_PEOPLE = 12;
+const NB_NIGHT = 2;
 const NB_PARTIAL = 2;
 function getRandomCalendar() {
     const calendar = getCalendar();
@@ -36,6 +37,8 @@ function getRandomCalendar() {
         peoples.sort(() => 0.5 - Math.random());
 
         for (let slot in day) {
+            //const isNight = slot == 'n1' || slot == 'n2';
+            //const isDayer = id => id < NB_PEOPLE - NB_PARTIAL - NB_NIGHT || id >= NB_PEOPLE - NB_PARTIAL;
             const pId = peoples.pop();
             peopleWorkingDays[pId] = peopleWorkingDays[pId] + 1;
             day[slot] = pId;
@@ -49,8 +52,10 @@ function evaluate(calendar) {
     calendar.score = 0;
     calendar.issues = [];
     mustWorkOncePerDay(calendar); // score max 70
-    mustWorkNotToMuch(calendar); // score max 100;
-    mustHaveRest(calendar); //score max 50
+    mustWorkNotToMuch(calendar); // score max 120;
+    mustHaveRest(calendar); //score max 60
+    mustOnlyWorkNights(calendar); // score max 70 //total 320
+    return calendar;
 }
 
 function mustWorkOncePerDay(calendar) {
@@ -75,6 +80,8 @@ function mustWorkOncePerDay(calendar) {
 
 function mustWorkNotToMuch(calendar) {
     // Temps annuel temps plein: 1547h soit 148h/ 4 semaines et 118h/4 semaines pour 80%
+    // 8h par slot, 9.5 pour les nights
+    // TODO les nuit compte pour 9.5 pour tout le monde ou juste les travailleurs de nuit ?
 
     for (let index = 0; index < NB_WEEK; index++) {
         let startIndex = index * 7;
@@ -86,7 +93,11 @@ function mustWorkNotToMuch(calendar) {
             period.forEach(day => {
                 for (let slot in day) {
                     if (day[slot] == personId) {
-                        nbHours += 8;
+                        if (NB_PEOPLE - NB_PARTIAL - NB_NIGHT <= personId && personId < NB_PEOPLE - NB_PARTIAL) {
+                            nbHours += 9.5;
+                        } else {
+                            nbHours += 8;
+                        }
                     }
                 }
             })
@@ -139,6 +150,23 @@ function mustHaveRest(calendar) {
     }
 }
 
+function mustOnlyWorkNights(calendar) {
+    calendar.forEach((day, dayIndex) => {
+        let workDay = false;
+        for (let slot in day) {
+            const personId = day[slot];
+            if (slot != 'n1' && slot != 'n2' && NB_PEOPLE - NB_PARTIAL - NB_NIGHT <= personId && personId < NB_PEOPLE - NB_PARTIAL) {
+                workDay = true;
+                calendar.issues.push(`${personId} work not at night, day ${dayIndex}`);
+            }
+        }
+
+        if (!workDay) {
+            calendar.score++;
+        }
+    })
+}
+
 function copy(calendar) {
     const copy = getCalendar();
 
@@ -182,17 +210,8 @@ function breed(a, b) {
     return [c, d]
 }
 
-function getSubPopulation(population, nb) {
-    const pop = [];
 
-    for (let i = 0; i < nb; i++) {
-        pop.push(population[Math.floor(Math.random() * population.length)])
-    }
-
-    return pop;
-}
-
-const MAX_POP = 500;
+const MAX_POP = 100;
 
 function getPopulation(old = []) {
     let population = [];
@@ -228,7 +247,7 @@ function getPopulation(old = []) {
 }
 
 function run() {
-    const maxRun = 300;
+    const maxRun = 100;
     let nbRun = 0;
 
     let population = [];
@@ -245,3 +264,4 @@ function run() {
 }
 
 run()
+//console.log(evaluate(getRandomCalendar()))
